@@ -23,8 +23,8 @@ type alias EncodeState =
 encode : Float -> Float -> Int -> String
 encode latitude longitude precision =
     let
-        state : EncodeState
-        state =
+        initialState : EncodeState
+        initialState =
             { chars = []
             , bits = 0
             , bitsTotal = 0
@@ -37,7 +37,7 @@ encode latitude longitude precision =
             , longitude = longitude
             }
     in
-        encodeRecursive precision state
+        encodeRecursive precision initialState
             |> .chars
             |> String.fromList
 

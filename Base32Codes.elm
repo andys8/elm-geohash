@@ -9,12 +9,15 @@ base32Codes =
     "0123456789bcdefghjkmnpqrstuvwxyz"
 
 
+flipTuple : a -> b -> ( b, a )
+flipTuple a b =
+    ( b, a )
+
+
 base32CodesDict : Dict Char Int
 base32CodesDict =
     String.toList base32Codes
-        |> Array.fromList
-        |> Array.indexedMap (\i -> (\a -> ( a, i )))
-        |> Array.toList
+        |> List.indexedMap flipTuple
         |> Dict.fromList
 
 
