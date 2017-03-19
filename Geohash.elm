@@ -10,17 +10,18 @@
 ----------------------------------------------------------------------
 
 
-module Geohash exposing (encode)
+module Geohash exposing (encode, decode)
 
 {-| This module is an Geohash Elm implementation.
 
 Thanks to [Ning Sun](https://github.com/sunng87) for the [JavaScript implementation](https://github.com/sunng87/node-geohash).
 
 # Functions
-@docs encode
+@docs encode, decode
 -}
 
 import GeohashEncode
+import GeohashDecode
 
 
 {-| Encodes latitude, longitude, precision to geohash.
@@ -30,3 +31,10 @@ import GeohashEncode
 encode : Float -> Float -> Int -> String
 encode =
     GeohashEncode.encode
+
+
+{-| Decodes a geohash value to a record containing latitude, longitude and error values.
+-}
+decode : String -> { latitude : Float, longitude : Float, latitudeError : Float, longitudeError : Float }
+decode =
+    GeohashDecode.decode

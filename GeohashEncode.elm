@@ -20,10 +20,6 @@ type alias EncodeState =
     }
 
 
-{-| Encodes latitude, longitude, precision to geohash.
-
-    encode 57.648 10.41 6 == "u4pruy"
--}
 encode : Float -> Float -> Int -> String
 encode latitude longitude precision =
     let
