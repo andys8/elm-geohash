@@ -8,3 +8,12 @@ decode hashValue =
     , latitudeError = 0
     , longitudeError = 0
     }
+
+
+decodeBoundingBox : String -> { minLat : Float, minLon : Float, maxLat : Float, maxLon : Float }
+decodeBoundingBox hashValue =
+    { minLat = 0
+    , minLon = 0
+    , maxLat = 0
+    , maxLon = 0
+    }
