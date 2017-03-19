@@ -10,14 +10,14 @@
 ----------------------------------------------------------------------
 
 
-module Geohash exposing (encode, decode)
+module Geohash exposing (encode, decode, decodeBoundingBox)
 
 {-| This module is an Geohash Elm implementation.
 
 Thanks to [Ning Sun](https://github.com/sunng87) for the [JavaScript implementation](https://github.com/sunng87/node-geohash).
 
 # Functions
-@docs encode, decode
+@docs encode, decode, decodeBoundingBox
 -}
 
 import GeohashEncode
@@ -33,8 +33,15 @@ encode =
     GeohashEncode.encode
 
 
-{-| Decodes a geohash value to a record containing latitude, longitude and error values.
+{-| Decodes a geohash value to a center record containing latitude, longitude and error values.
 -}
 decode : String -> { latitude : Float, longitude : Float, latitudeError : Float, longitudeError : Float }
 decode =
     GeohashDecode.decode
+
+
+{-| Decodes a geohash value to a bounding box.
+-}
+decodeBoundingBox : String -> { minLat : Float, minLon : Float, maxLat : Float, maxLon : Float }
+decodeBoundingBox =
+    GeohashDecode.decodeBoundingBox
