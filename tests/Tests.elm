@@ -25,5 +25,9 @@ all =
                 \() ->
                     Geohash.encode 37.8324 112.5584 9
                         |> Expect.equal "ww8p1r4t8"
+            , test "high accuracy" <|
+                \() ->
+                    Geohash.encode 48.14319769313948 11.536403596401215 12
+                        |> Expect.equal "u281ys0w3wtb"
             ]
         ]
