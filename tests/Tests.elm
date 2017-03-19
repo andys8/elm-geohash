@@ -2,72 +2,77 @@ module Tests exposing (all)
 
 import Test exposing (..)
 import Expect
-import Geohash exposing (encode, decode, decodeBoundingBox)
+import Geohash exposing (encode, decodeCoordinate, decodeBoundingBox)
+
+
+equalityThreshold : Float
+equalityThreshold =
+    0.0001
 
 
 all : Test
 all =
     describe "Geohash"
-        [ describe "Geohash.encode"
-            [ test "encodes Jutland" <|
+        [ describe "encode"
+            [ test "Jutland" <|
                 \() ->
-                    Geohash.encode 57.648 10.41 6
+                    encode 57.648 10.41 6
                         |> Expect.equal "u4pruy"
-            , test "encodes Curitiba" <|
+            , test "Curitiba" <|
                 \() ->
-                    Geohash.encode -25.38262 -49.26561 8
+                    encode -25.38262 -49.26561 8
                         |> Expect.equal "6gkzwgjz"
-            , test "precision 3" <|
+            , test "with precision 3" <|
                 \() ->
-                    Geohash.encode 32 117 3
+                    encode 32 117 3
                         |> Expect.equal "wte"
-            , test "precision 9" <|
+            , test "with precision 9" <|
                 \() ->
-                    Geohash.encode 37.8324 112.5584 9
+                    encode 37.8324 112.5584 9
                         |> Expect.equal "ww8p1r4t8"
-            , test "high accuracy" <|
+            , test "with precision 12" <|
                 \() ->
-                    Geohash.encode 48.14319769313948 11.536403596401215 12
+                    encode 48.14319769313948 11.536403596401215 12
                         |> Expect.equal "u281ys0w3wtb"
             ]
-        , describe "Geohash.decode"
-            [ test "decoded latitude" <|
+        , describe "decodeCoordinate"
+            [ test "decode latitude of ww8p1r4t8" <|
                 \() ->
-                    Geohash.decode "ww8p1r4t8"
-                        |> .latitude
+                    decodeCoordinate "ww8p1r4t8"
+                        |> .lat
                         |> (-) 37.8324
                         |> abs
-                        |> Expect.lessThan 0.0001
-            , test "decoded longitude" <|
+                        |> Expect.lessThan equalityThreshold
+            , test "decode longitude of ww8p1r4t8" <|
                 \() ->
-                    Geohash.decode "ww8p1r4t8"
-                        |> .longitude
+                    decodeCoordinate "ww8p1r4t8"
+                        |> .lon
                         |> (-) 112.5584
                         |> abs
-                        |> Expect.lessThan 0.0001
-            , test "decode t longitude" <|
+                        |> Expect.lessThan equalityThreshold
+            , test "decode longitude of t" <|
                 \() ->
-                    Geohash.decode "t"
-                        |> .longitude
+                    decodeCoordinate "t"
+                        |> .lon
                         |> (-) (45 + (90 - 45) / 2)
                         |> abs
-                        |> Expect.lessThan 0.0001
-            , test "decode t " <|
+                        |> Expect.lessThan equalityThreshold
+            , test "decode latitude of t " <|
                 \() ->
-                    Geohash.decode "t"
-                        |> .latitude
+                    decodeCoordinate "t"
+                        |> .lat
                         |> (-) (45 / 2)
                         |> abs
-                        |> Expect.lessThan 0.0001
+                        |> Expect.lessThan equalityThreshold
             ]
-        , describe "Geohash.decodeBoundingBox"
-            [ test "decode t" <|
+        , describe "decodeBoundingBox"
+            [ test "t" <|
                 \() ->
-                    Geohash.decodeBoundingBox "t"
+                    decodeBoundingBox "t"
                         |> Expect.equal { minLat = 0, minLon = 45, maxLat = 45, maxLon = 90 }
-            , test "decode munich" <|
+            , test "munich" <|
                 \() ->
-                    Geohash.decodeBoundingBox "u281"
+                    decodeBoundingBox "u281"
                         |> Expect.equal { minLat = 47.98828125, minLon = 11.25, maxLat = 48.1640625, maxLon = 11.6015625 }
             ]
         ]

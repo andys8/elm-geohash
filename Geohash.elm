@@ -10,21 +10,21 @@
 ----------------------------------------------------------------------
 
 
-module Geohash exposing (encode, decode, decodeBoundingBox)
+module Geohash exposing (encode, decodeCoordinate, decodeBoundingBox)
 
-{-| This module is an Geohash Elm implementation.
+{-| This module is a Geohash encoding and decoding implementation in pure Elm.
 
 Thanks to [Ning Sun](https://github.com/sunng87) for the [JavaScript implementation](https://github.com/sunng87/node-geohash).
 
 # Functions
-@docs encode, decode, decodeBoundingBox
+@docs encode, decodeCoordinate, decodeBoundingBox
 -}
 
 import GeohashEncode
 import GeohashDecode
 
 
-{-| Encodes latitude, longitude, precision to geohash.
+{-| Encodes coordinate (latitude, longitude precision) to geohash.
 
     encode 57.648 10.41 6 == "u4pruy"
 -}
@@ -33,14 +33,28 @@ encode =
     GeohashEncode.encode
 
 
-{-| Decodes a geohash value to a center record containing latitude, longitude and error values.
+{-| Decodes geohash and returns center coordinate.
+
+    decodeCoordinate "u281zk" ==
+    { lat = 48.14483642578125
+    , lon = 11.5740966796875
+    , latError = 0.00274658203125
+    , lonError = 0.0054931640625
+    }
 -}
-decode : String -> { latitude : Float, longitude : Float, latitudeError : Float, longitudeError : Float }
-decode =
+decodeCoordinate : String -> { lat : Float, lon : Float, latError : Float, lonError : Float }
+decodeCoordinate =
     GeohashDecode.decode
 
 
-{-| Decodes a geohash value to a bounding box.
+{-| Decodes a geohash and returns the bounding box.
+
+    decodeBoundingBox "u281zk" =
+    { minLat = 48.14208984375
+    , minLon = 11.568603515625
+    , maxLat = 48.1475830078125
+    , maxLon = 11.57958984375
+    }
 -}
 decodeBoundingBox : String -> { minLat : Float, minLon : Float, maxLat : Float, maxLon : Float }
 decodeBoundingBox =

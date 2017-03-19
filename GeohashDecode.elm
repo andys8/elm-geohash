@@ -15,28 +15,22 @@ type alias DecodeState =
     }
 
 
-decode : String -> { latitude : Float, longitude : Float, latitudeError : Float, longitudeError : Float }
+decode : String -> { lat : Float, lon : Float, latError : Float, lonError : Float }
 decode hashValue =
     let
-        bbox =
+        boundingBox =
             decodeBoundingBox (hashValue)
 
         lat =
-            (bbox.minLat + bbox.maxLat) / 2
+            (boundingBox.minLat + boundingBox.maxLat) / 2
 
         lon =
-            (bbox.minLon + bbox.maxLon) / 2
-
-        latErr =
-            bbox.maxLat - lat
-
-        lonErr =
-            bbox.maxLon - lon
+            (boundingBox.minLon + boundingBox.maxLon) / 2
     in
-        { latitude = lat
-        , longitude = lon
-        , latitudeError = latErr
-        , longitudeError = lonErr
+        { lat = lat
+        , lon = lon
+        , latError = boundingBox.maxLat - lat
+        , lonError = boundingBox.maxLon - lon
         }
 
 
@@ -46,8 +40,8 @@ decodeBoundingBox hashString =
         hashValues =
             convertHashToBase32Code hashString
 
-        decodeState : DecodeState
-        decodeState =
+        initialState : DecodeState
+        initialState =
             { isLon = True
             , maxLat = 90
             , minLat = -90
@@ -56,7 +50,7 @@ decodeBoundingBox hashString =
             }
 
         resultState =
-            decodeIterateHashValues hashValues decodeState
+            decodeIterateHashValues hashValues initialState
     in
         { minLat = resultState.minLat
         , minLon = resultState.minLon
@@ -65,19 +59,31 @@ decodeBoundingBox hashString =
         }
 
 
+convertHashToBase32Code : String -> List Int
+convertHashToBase32Code hashString =
+    String.toList hashString
+        |> List.filterMap convertCharToBase32Code
+
+
+convertCharToBase32Code : Char -> Maybe Int
+convertCharToBase32Code char =
+    Dict.get (Char.toLower char) base32CodesDict
+
+
 decodeIterateHashValues : List Int -> DecodeState -> DecodeState
 decodeIterateHashValues hashValues state =
     case hashValues of
         [] ->
             state
 
-        x :: xs ->
-            decodeIterateHashValues xs (decodeIterateBits x state)
+        hashValue :: remainingHashValues ->
+            decodeIterateBits hashValue state
+                |> decodeIterateHashValues remainingHashValues
 
 
 decodeIterateBits : Int -> DecodeState -> DecodeState
-decodeIterateBits hashValue state =
-    decodeIterate hashValue 4 state
+decodeIterateBits hashValue =
+    decodeIterate hashValue 4
 
 
 decodeIterate : Int -> Int -> DecodeState -> DecodeState
@@ -85,7 +91,9 @@ decodeIterate hashValue bits state =
     if bits < 0 then
         state
     else
-        decodeIterate hashValue (bits - 1) (processState hashValue bits state |> switchIsLon)
+        processState hashValue bits state
+            |> switchIsLon
+            |> decodeIterate hashValue (bits - 1)
 
 
 switchIsLon : DecodeState -> DecodeState
@@ -118,14 +126,3 @@ processState hashValue bits state =
                     { state | minLat = mid }
                 else
                     { state | maxLat = mid }
-
-
-convertHashToBase32Code : String -> List Int
-convertHashToBase32Code hashString =
-    String.toList hashString
-        |> List.filterMap convertCharToBase32Code
-
-
-convertCharToBase32Code : Char -> Maybe Int
-convertCharToBase32Code char =
-    Dict.get (Char.toLower char) base32CodesDict
