@@ -50,12 +50,11 @@ type alias EncodeState =
     { chars : List Char
     , bits : Int
     , bitsTotal : Int
-    , hash_value : Int
+    , hashValue : Int
     , maxLat : Float
     , minLat : Float
     , maxLon : Float
     , minLon : Float
-    , mid : Float
     , latitude : Float
     , longitude : Float
     }
@@ -66,96 +65,104 @@ type alias EncodeState =
     encode 57.648 10.41 6 == "u4pruy"
 -}
 encode : Float -> Float -> Int -> String
-encode latitude longitude numberOfChars =
+encode latitude longitude precision =
     let
-        encodeState : EncodeState
-        encodeState =
+        state : EncodeState
+        state =
             { chars = []
             , bits = 0
             , bitsTotal = 0
-            , hash_value = 0
+            , hashValue = 0
             , maxLat = 90
             , minLat = -90
             , maxLon = 180
             , minLon = -180
-            , mid = 0
             , latitude = latitude
             , longitude = longitude
             }
     in
-        (encode_ numberOfChars encodeState) |> .chars |> String.fromList
+        encodeRecursive precision state
+            |> .chars
+            |> String.fromList
 
 
-encode_ : Int -> EncodeState -> EncodeState
-encode_ numberOfChars encodeState =
-    if List.length encodeState.chars < numberOfChars then
-        encode__ encodeState |> encodeAddChar |> (encode_ numberOfChars)
+encodeRecursive : Int -> EncodeState -> EncodeState
+encodeRecursive precision state =
+    if List.length state.chars < precision then
+        encodeTransform state
+            |> encodeAddChar
+            |> encodeRecursive precision
     else
-        encodeState
+        state
 
 
-encode__ : EncodeState -> EncodeState
-encode__ encodeState =
+encodeTransform : EncodeState -> EncodeState
+encodeTransform state =
     let
-        modState =
-            if encodeState.bitsTotal % 2 == 0 then
-                modifyLon encodeState
+        newState : EncodeState
+        newState =
+            if state.bitsTotal % 2 == 0 then
+                modifyLongitude state
             else
-                modifyLat encodeState
+                modifyLatitude state
     in
-        { modState
-            | bits = modState.bits + 1
-            , bitsTotal = modState.bitsTotal + 1
+        { newState
+            | bits = newState.bits + 1
+            , bitsTotal = newState.bitsTotal + 1
         }
 
 
 encodeAddChar : EncodeState -> EncodeState
-encodeAddChar encodeState =
+encodeAddChar state =
     let
+        char : Char
         char =
-            Array.get encodeState.hash_value base32CodesArray
+            Array.get state.hashValue base32CodesArray
+                |> Maybe.withDefault ' '
     in
-        if encodeState.bits == 5 then
-            { encodeState
-                | chars = encodeState.chars ++ [ (Maybe.withDefault ' ' char) ]
+        if state.bits == 5 then
+            { state
+                | chars = state.chars ++ [ char ]
                 , bits = 0
-                , hash_value = 0
+                , hashValue = 0
             }
         else
-            encodeState
+            state
 
 
-modifyLon : EncodeState -> EncodeState
-modifyLon state =
+modifyLongitude : EncodeState -> EncodeState
+modifyLongitude state =
     let
+        mid : Float
         mid =
             (state.maxLon + state.minLon) / 2
     in
         if state.longitude > mid then
             { state
-                | hash_value = (Bitwise.shiftLeftBy 1 state.hash_value) + 1
+                | hashValue = (Bitwise.shiftLeftBy 1 state.hashValue) + 1
                 , minLon = mid
             }
         else
             { state
-                | hash_value = (Bitwise.shiftLeftBy 1 state.hash_value)
+                | hashValue = (Bitwise.shiftLeftBy 1 state.hashValue)
                 , maxLon = mid
             }
 
 
-modifyLat : EncodeState -> EncodeState
-modifyLat state =
+modifyLatitude : EncodeState -> EncodeState
+modifyLatitude state =
     let
+        mid : Float
         mid =
             (state.maxLat + state.minLat) / 2
     in
         if state.latitude > mid then
             { state
-                | hash_value = (Bitwise.shiftLeftBy 1 state.hash_value) + 1
+                | hashValue = (Bitwise.shiftLeftBy 1 state.hashValue) + 1
                 , minLat = mid
             }
         else
             { state
-                | hash_value = (Bitwise.shiftLeftBy 1 state.hash_value)
+                | hashValue = (Bitwise.shiftLeftBy 1 state.hashValue)
                 , maxLat = mid
             }
