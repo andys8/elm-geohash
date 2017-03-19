@@ -12,16 +12,20 @@
 
 module Geohash exposing (encode)
 
-{-| This module is a Pure Elm implementation for Geohashes.
+{-| This module is an Geohash Elm implementation.
 
-Thanks to Sun Ning for the JavaScript implementation.
+Thanks to [Ning Sun](https://github.com/sunng87) for the [JavaScript implementation](https://github.com/sunng87/node-geohash).
+
+# What is a geohash?
+The geohash preserves **spatial locality** so that points close to each other in space are close to each other on disk. This is because the arrangement of the result is comparable with space filling **Z-order curves**. The length of geohashes can be chosen individually and depending on the degree of accuracy. Characters at the end are less significant. Truncating the geohash can be used to cover larger areas. In fact this can be used to build range queries based on the prefix of the primary key.
+
+The geohash is constructed bitwise. The range of both dimensions will be cut in half. If the target point is located in the greater half of the range, the value of the first bit is `1`. Otherwise it’s `0`. The example longitude `11.53..°` would result in a `1-bit` as first value because it’s part of range `[0°, +180°]` and not `[-180°, 0°)`. This binary partitioning approach will be repeated alternately for both axes (beginning with longitude). Because the encoding is weaving the bits together, the geohash has the spatial locality property.
 
 # Functions
 @docs encode
 -}
 
 import String
-import Char
 import Dict exposing (Dict)
 import Array exposing (Array)
 import Bitwise
@@ -62,7 +66,9 @@ type alias EncodeState =
     }
 
 
-{-| Encodes latitude/longitude to geohash, either to specified precision or to automatically evaluated precision.
+{-| Encodes latitude, longitude, precision to geohash.
+
+    encode 57.648 10.41 6 == "u4pruy"
 -}
 encode : Float -> Float -> Int -> String
 encode latitude longitude numberOfChars =

@@ -21,4 +21,4 @@ geohash = Geohash.encode -25.38262 -49.26561 8
 ```
 
 ## Javascript
-Thanks to the authors of the javascript version ([github.com/sunng87/node-geohash](https://github.com/sunng87/node-geohash)).
+Thanks to [Ning Sun](https://github.com/sunng87) for the [JavaScript implementation](https://github.com/sunng87/node-geohash).
