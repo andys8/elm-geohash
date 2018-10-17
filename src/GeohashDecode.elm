@@ -1,9 +1,9 @@
 module GeohashDecode exposing (decode, decodeBoundingBox)
 
-import Dict
-import Char
 import Base32Codes exposing (..)
 import Bitwise
+import Char
+import Dict
 
 
 type alias DecodeState =
@@ -19,7 +19,7 @@ decode : String -> { lat : Float, lon : Float, latError : Float, lonError : Floa
 decode hashValue =
     let
         boundingBox =
-            decodeBoundingBox (hashValue)
+            decodeBoundingBox hashValue
 
         lat =
             (boundingBox.minLat + boundingBox.maxLat) / 2
@@ -27,11 +27,11 @@ decode hashValue =
         lon =
             (boundingBox.minLon + boundingBox.maxLon) / 2
     in
-        { lat = lat
-        , lon = lon
-        , latError = boundingBox.maxLat - lat
-        , lonError = boundingBox.maxLon - lon
-        }
+    { lat = lat
+    , lon = lon
+    , latError = boundingBox.maxLat - lat
+    , lonError = boundingBox.maxLon - lon
+    }
 
 
 decodeBoundingBox : String -> { minLat : Float, minLon : Float, maxLat : Float, maxLon : Float }
@@ -52,11 +52,11 @@ decodeBoundingBox hashString =
         resultState =
             decodeIterateHashValues hashValues initialState
     in
-        { minLat = resultState.minLat
-        , minLon = resultState.minLon
-        , maxLat = resultState.maxLat
-        , maxLon = resultState.maxLon
-        }
+    { minLat = resultState.minLat
+    , minLon = resultState.minLon
+    , maxLat = resultState.maxLat
+    , maxLon = resultState.maxLon
+    }
 
 
 convertHashToBase32Code : String -> List Int
@@ -90,6 +90,7 @@ decodeIterate : Int -> Int -> DecodeState -> DecodeState
 decodeIterate hashValue bits state =
     if bits < 0 then
         state
+
     else
         processState hashValue bits state
             |> switchIsLon
@@ -106,23 +107,26 @@ processState hashValue bits state =
     let
         bit : Int
         bit =
-            (Bitwise.and (Bitwise.shiftRightBy bits hashValue) 1)
+            Bitwise.and (Bitwise.shiftRightBy bits hashValue) 1
     in
-        if state.isLon then
-            let
-                mid =
-                    (state.maxLon + state.minLon) / 2
-            in
-                if bit == 1 then
-                    { state | minLon = mid }
-                else
-                    { state | maxLon = mid }
+    if state.isLon then
+        let
+            mid =
+                (state.maxLon + state.minLon) / 2
+        in
+        if bit == 1 then
+            { state | minLon = mid }
+
         else
-            let
-                mid =
-                    (state.maxLat + state.minLat) / 2
-            in
-                if bit == 1 then
-                    { state | minLat = mid }
-                else
-                    { state | maxLat = mid }
+            { state | maxLon = mid }
+
+    else
+        let
+            mid =
+                (state.maxLat + state.minLat) / 2
+        in
+        if bit == 1 then
+            { state | minLat = mid }
+
+        else
+            { state | maxLat = mid }

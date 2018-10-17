@@ -1,7 +1,7 @@
-module Base32Codes exposing (base32CodesDict, base32CodesArray)
+module Base32Codes exposing (base32CodesArray, base32CodesDict)
 
-import Dict exposing (Dict)
 import Array exposing (Array)
+import Dict exposing (Dict)
 
 
 base32Codes : String
