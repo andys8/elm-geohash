@@ -1,11 +1,9 @@
 # Tests
 
 ```
-npm install -g elm-test
+elm make Main.elm --output ../dist/mainTest.js
 ```
 
 Run tests in project root:
 
-```
-elm-test
-```
+open indexTests.html with browser to see test results

@@ -1,9 +1,9 @@
 module GeohashEncode exposing (encode)
 
-import String
 import Array exposing (get)
-import Bitwise
 import Base32Codes exposing (..)
+import Bitwise
+import String
 
 
 type alias EncodeState =
@@ -37,9 +37,9 @@ encode latitude longitude precision =
             , longitude = longitude
             }
     in
-        encodeRecursive precision initialState
-            |> .chars
-            |> String.fromList
+    encodeRecursive precision initialState
+        |> .chars
+        |> String.fromList
 
 
 encodeRecursive : Int -> EncodeState -> EncodeState
@@ -48,6 +48,7 @@ encodeRecursive precision state =
         encodeTransform state
             |> encodeAddChar
             |> encodeRecursive precision
+
     else
         state
 
@@ -57,15 +58,16 @@ encodeTransform state =
     let
         newState : EncodeState
         newState =
-            if state.bitsTotal % 2 == 0 then
+            if Basics.remainderBy 2 state.bitsTotal == 0 then
                 modifyLongitude state
+
             else
                 modifyLatitude state
     in
-        { newState
-            | bits = newState.bits + 1
-            , bitsTotal = newState.bitsTotal + 1
-        }
+    { newState
+        | bits = newState.bits + 1
+        , bitsTotal = newState.bitsTotal + 1
+    }
 
 
 encodeAddChar : EncodeState -> EncodeState
@@ -76,14 +78,15 @@ encodeAddChar state =
             get state.hashValue base32CodesArray
                 |> Maybe.withDefault ' '
     in
-        if state.bits == 5 then
-            { state
-                | chars = state.chars ++ [ char ]
-                , bits = 0
-                , hashValue = 0
-            }
-        else
-            state
+    if state.bits == 5 then
+        { state
+            | chars = state.chars ++ [ char ]
+            , bits = 0
+            , hashValue = 0
+        }
+
+    else
+        state
 
 
 modifyLongitude : EncodeState -> EncodeState
@@ -93,16 +96,17 @@ modifyLongitude state =
         mid =
             (state.maxLon + state.minLon) / 2
     in
-        if state.longitude > mid then
-            { state
-                | hashValue = (Bitwise.shiftLeftBy 1 state.hashValue) + 1
-                , minLon = mid
-            }
-        else
-            { state
-                | hashValue = (Bitwise.shiftLeftBy 1 state.hashValue)
-                , maxLon = mid
-            }
+    if state.longitude > mid then
+        { state
+            | hashValue = Bitwise.shiftLeftBy 1 state.hashValue + 1
+            , minLon = mid
+        }
+
+    else
+        { state
+            | hashValue = Bitwise.shiftLeftBy 1 state.hashValue
+            , maxLon = mid
+        }
 
 
 modifyLatitude : EncodeState -> EncodeState
@@ -112,13 +116,14 @@ modifyLatitude state =
         mid =
             (state.maxLat + state.minLat) / 2
     in
-        if state.latitude > mid then
-            { state
-                | hashValue = (Bitwise.shiftLeftBy 1 state.hashValue) + 1
-                , minLat = mid
-            }
-        else
-            { state
-                | hashValue = (Bitwise.shiftLeftBy 1 state.hashValue)
-                , maxLat = mid
-            }
+    if state.latitude > mid then
+        { state
+            | hashValue = Bitwise.shiftLeftBy 1 state.hashValue + 1
+            , minLat = mid
+        }
+
+    else
+        { state
+            | hashValue = Bitwise.shiftLeftBy 1 state.hashValue
+            , maxLat = mid
+        }
