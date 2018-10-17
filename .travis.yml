@@ -1,6 +1,10 @@
 language: node_js
 node_js:
-  - "6"
+  - "8"
+  - "10"
 before_script:
-  - npm install -g elm elm-test
-script: elm-test
+  - npm install -g elm
+  - npm install -g elm-test@elm0.19.0
+script:
+  - elm make
+  - elm-test
