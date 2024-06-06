@@ -1,4 +1,4 @@
-# elm-geohash [![Travis build status](https://travis-ci.org/andys8/elm-geohash.svg?branch=master)](https://travis-ci.org/andys8/elm-geohash)
+# elm-geohash
 
 A geohash library for Elm.
 
